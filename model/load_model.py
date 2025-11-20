@@ -1,20 +1,15 @@
-# model/load_model.py
 import torch
-from transformers import BertTokenizerFast, BertForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-# This path is relative to the project root when you run your app
-MODEL_DIR = "model/saved_model"
+MODEL_NAME = "Shresthhan/NepaliSentimentBERT"
 
-# Choose CPU or GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Load tokenizer and model from the fine-tuned checkpoint folder
-tokenizer = BertTokenizerFast.from_pretrained(MODEL_DIR)
-model = BertForSequenceClassification.from_pretrained(MODEL_DIR)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
 model.to(device)
 model.eval()
 
-# Map label IDs to human-readable strings
 id2label = {
     0: "negative",
     1: "positive",
@@ -22,16 +17,12 @@ id2label = {
 }
 
 def predict_sentiment(text: str):
-    """
-    Run a forward pass on a single text and return (label, confidence).
-    """
-    # Tokenize input text exactly like in training
     inputs = tokenizer(
         text,
         return_tensors="pt",
         padding=True,
         truncation=True,
-        max_length=228,   # same MAX_LENGTH you used in Kaggle
+        max_length=228,
     ).to(device)
 
     with torch.no_grad():
