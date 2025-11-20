@@ -1,0 +1,4 @@
+# Ignore local model files
+model/saved_model/
+__pycache__/
+*.pyc
