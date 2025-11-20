@@ -18,65 +18,53 @@ This README explains how to get the model, set up the project, and run everythin
 
 ## 2. Repository structure
 
-Nepali_Sentiment_App/
-model/
-saved_model/ # fine-tuned BERT model exported from Kaggle
-config.json
-model.safetensors or pytorch_model.bin
-tokenizer.json
-tokenizer_config.json
-special_tokens_map.json
-vocab.txt
-...
-load_model.py # shared model loading + predict_sentiment()
+Nepali_Sentiment_App/  
+model/  
+saved_model/ # (optional) local cache; model is loaded from Hugging Face  
+load_model.py # shared model loading + predict_sentiment()  
 
-api/
-main.py # FastAPI app exposing /predict
-requirements.txt # backend dependencies (fastapi, uvicorn, transformers, ...)
+api/  
+main.py # FastAPI app exposing /predict  
+requirements.txt # backend dependencies (fastapi, uvicorn, transformers, ...)  
 
-ui/
-app.py # Streamlit UI
-requirements.txt # frontend dependencies (streamlit, requests)
+ui/  
+app.py # Streamlit UI  
+requirements.txt # frontend dependencies (streamlit, requests)  
 
-docker/
-Dockerfile.api # builds API image
-Dockerfile.ui # builds UI image
-docker-compose.yml # runs both containers together
+docker/  
+Dockerfile.api # builds API image  
+Dockerfile.ui # builds UI image  
+docker-compose.yml # runs both containers together  
 
-README.md # this file
-
+README.md # this file  
 
 ---
 
-## 3. Getting the trained model from Kaggle (one‑time)
+## 3. Getting the trained model (Hugging Face)
 
-If you already have `model/saved_model/` in place, you can skip this section.
+You do **not** need to download any model files into this repository.
 
-1. Train your Nepali BERT model in a Kaggle notebook.  
-2. At the end of the notebook, save the model and tokenizer in Hugging Face format:
+The fine‑tuned BERT model is published on Hugging Face as:
 
-    output_dir = "/kaggle/working/nepali-sentiment-model"
-    model.save_pretrained(output_dir)
-    tokenizer.save_pretrained(output_dir)
+Shresthhan/NepaliSentimentBERT
 
 
-3. Click **Save Version / Commit** in Kaggle and let the notebook finish running.  
-4. Open the committed version → **Output** tab → download the `nepali-sentiment-model` folder (or ZIP).  
-5. On your local machine, unzip if needed and place it inside the project as:
+The code in `model/load_model.py` uses:
 
-    Nepali_Sentiment_App/
-    model/
-    saved_model/
-    config.json
-    model.safetensors or pytorch_model.bin
-    tokenizer.json
-    tokenizer_config.json
-    special_tokens_map.json
-    vocab.txt
-    ...
+MODEL_NAME = "Shresthhan/NepaliSentimentBERT"
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
 
 
-The `load_model.py` file expects the model directory to be `model/saved_model`.
+When you run the project for the first time:
+
+- Transformers will automatically download the model and tokenizer from Hugging Face.  
+- The files are cached under your local Hugging Face cache directory (typically in your user home folder).  
+- Subsequent runs reuse the cached copy; no extra setup is required.
+
+So, to run this project on any machine, you only need:
+- Internet access the first time you run the code, and  
+- A Hugging Face account **is not required** just to download the public model.
 
 ---
 
@@ -84,10 +72,10 @@ The `load_model.py` file expects the model directory to be `model/saved_model`.
 
 To run this project you need:
 
-- Python **3.10+** installed on your machine  
-- `pip` (Python package manager)  
+- Python 3.10+ installed on your machine  
+- pip (Python package manager)  
 - Docker Desktop (Windows/macOS) or Docker Engine + Docker Compose (Linux) if you want to run with Docker  
-- The fine‑tuned model files placed under `model/saved_model/` as shown above
+- Internet access on first run so the model `Shresthhan/NepaliSentimentBERT` can be downloaded from Hugging Face
 
 ---
 
@@ -97,27 +85,30 @@ These steps run FastAPI and Streamlit directly with Python.
 
 ### 5.1. Create and activate a virtual environment
 
-    cd Nepali_Sentiment_App
+cd Nepali_Sentiment_App
 
-    python -m venv .venv
+python -m venv .venv
 
-    Windows
-    .venv\Scripts\activate
+Windows
+.venv\Scripts\activate
 
-    Linux/macOS
-    source .venv/bin/activate
+Linux/macOS
+source .venv/bin/activate
 
 
 ### 5.2. Install backend (API) dependencies + CPU‑only PyTorch
 
 `api/requirements.txt`:
-    fastapi
-    uvicorn[standard]
-    transformers
+
+fastapi
+uvicorn[standard]
+transformers
+
 
 Install:
-    pip install -r api/requirements.txt
-    pip install --extra-index-url https://download.pytorch.org/whl/cpu torch==2.3.1
+
+pip install -r api/requirements.txt
+pip install --extra-index-url https://download.pytorch.org/whl/cpu torch==2.3.1
 
 
 This installs FastAPI, Transformers, and a CPU‑only version of PyTorch (no CUDA required).
@@ -125,24 +116,28 @@ This installs FastAPI, Transformers, and a CPU‑only version of PyTorch (no CUD
 ### 5.3. Install frontend (UI) dependencies
 
 `ui/requirements.txt`:
-    streamlit
-    requests
+streamlit
+requests
+
 
 Install:
-    pip install -r ui/requirements.txt
+
+pip install -r ui/requirements.txt
 
 
 ### 5.4. Start the FastAPI backend
 
 From the project root:
-    uvicorn api.main:app --reload --port 8000
+
+uvicorn api.main:app --reload --port 8000
+
 
 - Open `http://localhost:8000/docs` in your browser.  
 - Under `POST /predict`, click **Try it out**, change the JSON to:
-    {
-    "text": "यो फिल्म निकै राम्रो छ।"
-    }
 
+{
+"text": "यो फिल्म निकै राम्रो छ।"
+}
 
 - Click **Execute** and check that you get a JSON response with `"label"` and `"confidence"`.
 
@@ -150,8 +145,8 @@ From the project root:
 
 Open a **second** terminal, activate the same virtual env, and run:
 
-    cd Nepali_Sentiment_App
-    streamlit run ui/app.py --server.port 8501
+cd Nepali_Sentiment_App
+streamlit run ui/app.py --server.port 8501
 
 
 Then:
@@ -172,8 +167,10 @@ The project uses two containers:
 ### 6.1. Build the images
 
 Make sure Docker is running, then:
-    cd Nepali_Sentiment_App/docker
-    docker compose build
+
+cd Nepali_Sentiment_App/docker
+docker compose build
+
 
 If you added `image:` fields in `docker-compose.yml`, this will also tag the images (for example, `nepali-sentiment-api:latest` and `nepali-sentiment-ui:latest`).
 
@@ -194,7 +191,7 @@ To stop the containers, press `Ctrl + C` in the terminal, or run:
 docker compose down
 
 
-If you retrain the model later and update `model/saved_model/`, rebuild the API image so Docker picks up the new files:
+If you retrain the model later and update the Hugging Face repository, just rebuild the API image so Docker pulls the new version on first run:
 
 cd Nepali_Sentiment_App/docker
 docker compose build api
@@ -221,7 +218,7 @@ You can paste them into:
 ## 8. How it works (short explanation)
 
 1. **Model loading (`model/load_model.py`)**  
-   - Loads tokenizer and `BertForSequenceClassification` from `model/saved_model/`.  
+   - Loads tokenizer and `AutoModelForSequenceClassification` from the Hugging Face model `Shresthhan/NepaliSentimentBERT` (downloaded and cached automatically).  
    - Moves the model to CPU (or GPU if available) and defines a `predict_sentiment(text)` function that returns `(label, confidence)`.
 
 2. **FastAPI backend (`api/main.py`)**  
@@ -250,9 +247,22 @@ You can paste them into:
 
 ## 10. Author and license
 
-- **Author:** _Your Name_  
-- **License:** MIT (or any license you choose)  
-- If using MIT, add a separate `LICENSE` file with the standard MIT license text.
+- **Author:** Ankit Shrestha  
+- **License:** MIT  
+- This repository is licensed under the MIT License. See the `LICENSE` file for details.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
