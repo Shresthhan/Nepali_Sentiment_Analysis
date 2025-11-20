@@ -52,7 +52,9 @@ Shresthhan/NepaliSentimentBERT
 The code in `model/load_model.py` uses:
 
 MODEL_NAME = "Shresthhan/NepaliSentimentBERT"
+
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
 
 
@@ -101,7 +103,9 @@ source .venv/bin/activate
 `api/requirements.txt`:
 
 fastapi
+
 uvicorn[standard]
+
 transformers
 
 
@@ -116,7 +120,9 @@ This installs FastAPI, Transformers, and a CPU‑only version of PyTorch (no CUD
 ### 5.3. Install frontend (UI) dependencies
 
 `ui/requirements.txt`:
+
 streamlit
+
 requests
 
 
