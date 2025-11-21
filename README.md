@@ -162,7 +162,7 @@ Install:
 
 ```bash
 pip install -r api/requirements.txt
-pip install --extra-index-url https://download.pytorch.org/whl/cpu torch==2.3.1
+pip install --extra-index-url https://download.pytorch.org/whl/cpu torch==2.6.0
 ```
 
 This installs FastAPI, Transformers, and a CPU‑only version of PyTorch (no CUDA required).
