@@ -80,11 +80,58 @@ To run this project, you need:
 
 ---
 
-## 5. Running locally (without Docker)
+## 5. Running with Docker (Recommended)
+
+The project uses two containers:
+
+- `api`: FastAPI backend + BERT model  
+- `ui`: Streamlit frontend that calls the backend via HTTP
+
+### 5.1. Build the images
+
+Make sure Docker is running, then:
+
+```bash
+cd Nepali_Sentiment_App/docker
+docker compose build
+```
+
+If you added `image:` fields in `docker-compose.yml`, this will also tag the images (e.g., `nepali-sentiment-api:latest` and `nepali-sentiment-ui:latest`).
+
+### 5.2. Start the containers
+
+```bash
+docker compose up
+```
+
+Keep this terminal open to see logs from both containers.
+
+### 5.3. Access the app
+
+- **FastAPI docs:** `http://localhost:8000/docs`  
+- **Streamlit UI:** `http://localhost:8501`
+
+To stop the containers, press `Ctrl + C` in the terminal, or run:
+
+```bash
+docker compose down
+```
+
+If you retrain the model later and update the Hugging Face repository, just rebuild the API image so Docker pulls the new version on first run:
+
+```bash
+cd Nepali_Sentiment_App/docker
+docker compose build api
+docker compose up
+```
+
+---
+
+## 6. Running locally (without Docker)
 
 These steps run FastAPI and Streamlit directly with Python.
 
-### 5.1. Create and activate a virtual environment
+### 6.1. Create and activate a virtual environment
 
 ```bash
 cd Nepali_Sentiment_App
@@ -101,7 +148,7 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-### 5.2. Install backend (API) dependencies + CPU‑only PyTorch
+### 6.2. Install backend (API) dependencies + CPU‑only PyTorch
 
 `api/requirements.txt`:
 
@@ -120,7 +167,7 @@ pip install --extra-index-url https://download.pytorch.org/whl/cpu torch==2.3.1
 
 This installs FastAPI, Transformers, and a CPU‑only version of PyTorch (no CUDA required).
 
-### 5.3. Install frontend (UI) dependencies
+### 6.3. Install frontend (UI) dependencies
 
 `ui/requirements.txt`:
 
@@ -135,7 +182,7 @@ Install:
 pip install -r ui/requirements.txt
 ```
 
-### 5.4. Start the FastAPI backend
+### 6.4. Start the FastAPI backend
 
 From the project root:
 
@@ -154,7 +201,7 @@ uvicorn api.main:app --reload --port 8000
 
 - Click **Execute** and verify that you receive a JSON response with `"label"` and `"confidence"`.
 
-### 5.5. Start the Streamlit UI
+### 6.5. Start the Streamlit UI
 
 Open a **second** terminal, activate the same virtual env, and run:
 
@@ -168,53 +215,6 @@ Then:
 - Open `http://localhost:8501` in your browser.  
 - Type a Nepali sentence and click **Analyze sentiment**.  
 - You should see the predicted label and confidence returned by the FastAPI backend.
-
----
-
-## 6. Running with Docker
-
-The project uses two containers:
-
-- `api`: FastAPI backend + BERT model  
-- `ui`: Streamlit frontend that calls the backend via HTTP
-
-### 6.1. Build the images
-
-Make sure Docker is running, then:
-
-```bash
-cd Nepali_Sentiment_App/docker
-docker compose build
-```
-
-If you added `image:` fields in `docker-compose.yml`, this will also tag the images (e.g., `nepali-sentiment-api:latest` and `nepali-sentiment-ui:latest`).
-
-### 6.2. Start the containers
-
-```bash
-docker compose up
-```
-
-Keep this terminal open to see logs from both containers.
-
-### 6.3. Access the app
-
-- **FastAPI docs:** `http://localhost:8000/docs`  
-- **Streamlit UI:** `http://localhost:8501`
-
-To stop the containers, press `Ctrl + C` in the terminal, or run:
-
-```bash
-docker compose down
-```
-
-If you retrain the model later and update the Hugging Face repository, just rebuild the API image so Docker pulls the new version on first run:
-
-```bash
-cd Nepali_Sentiment_App/docker
-docker compose build api
-docker compose up
-```
 
 ---
 
